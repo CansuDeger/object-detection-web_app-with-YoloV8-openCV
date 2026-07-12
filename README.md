@@ -208,30 +208,6 @@ pip install pyngrok
 ngrok http 5000
 ```
 
----
 
-## 📄 Lisans
 
-Bu proje MIT lisansı ile lisanslanmıştır.
 
----
-
-## 🤝 Katkı
-
-Pull request ve issue'lar memnuniyetle karşılanır.
-
-1. Fork'la
-2. Feature branch oluştur (`git checkout -b feature/yenilik`)
-3. Commit'le (`git commit -m 'Yenilik eklendi'`)
-4. Push'la (`git push origin feature/yenilik`)
-5. Pull Request aç
-
----
-
-## 📬 İletişim
-
-Sorularınız için issue açabilirsiniz.
-
----
-
-⭐ Projeyi beğendiyseniz star atmayı unutmayın!
