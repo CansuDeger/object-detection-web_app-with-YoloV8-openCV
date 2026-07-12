@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patates Böceği Tespit Sistemi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #2d6a2d;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 { font-size: 24px; margin-bottom: 5px; }
+        header p  { font-size: 14px; opacity: 0.85; }
+
+        .kart {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .kart h2 { font-size: 18px; color: #333; margin-bottom: 15px; }
+
+        .yukle-alan {
+            border: 2px dashed #2d6a2d;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .yukle-alan:hover { background: #f0f8f0; }
+
+        .yukle-alan input[type="file"] {
+            display: none;
+        }
+
+        .yukle-alan label {
+            cursor: pointer;
+            display: block;
+        }
+
+        .yukle-alan .ikon { font-size: 48px; margin-bottom: 10px; }
+        .yukle-alan p { color: #666; font-size: 14px; }
+
+        #onizleme {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        #onizleme img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .btn {
+            background: #2d6a2d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: #1e4d1e; }
+        .btn:disabled { background: #aaa; cursor: not-allowed; }
+
+        .sonuc-kutu {
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .tehlike-yok    { background: #d4edda; border: 1px solid #28a745; color: #155724; }
+        .tehlike-orta   { background: #fff3cd; border: 1px solid #ffc107; color: #856404; }
+        .tehlike-yuksek { background: #f8d7da; border: 1px solid #dc3545; color: #721c24; }
+
+        .sonuc-kutu h3 { font-size: 22px; margin-bottom: 5px; }
+        .sonuc-kutu p  { font-size: 14px; }
+
+        .tahmin-goruntu {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .tahmin-goruntu img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .yukluyor {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>🥔 Patates Böceği Tespit Sistemi</h1>
+        <p>Fotoğraf yükle, YOLOv8 modeli böcekleri otomatik tespit etsin</p>
+    </header>
+
+    <!-- Yükleme Kartı -->
+    <div class="kart">
+        <h2>📷 Fotoğraf Yükle</h2>
+        <form method="POST" enctype="multipart/form-data" id="form">
+            <div class="yukle-alan">
+                <label for="goruntu">
+                    <div class="ikon">📁</div>
+                    <p><strong>Tıkla veya sürükle</strong></p>
+                    <p>JPG, PNG desteklenir</p>
+                </label>
+                <input type="file" id="goruntu" name="goruntu"
+                       accept="image/*" onchange="onizle(this)">
+            </div>
+
+            <div id="onizleme"></div>
+
+            <div class="yukluyor" id="yukluyor">
+                ⏳ Model analiz ediyor, lütfen bekle...
+            </div>
+
+            <button type="submit" class="btn" id="btn">
+                🔍 Böcek Tespiti Yap
+            </button>
+        </form>
+    </div>
+
+    <!-- Sonuç Kartı -->
+    {% if sonuc %}
+    <div class="kart">
+        <h2>📊 Tespit Sonucu</h2>
+
+        <div class="sonuc-kutu
+            {% if sonuc.tehlike == 'yok' %}tehlike-yok
+            {% elif sonuc.tehlike == 'orta' %}tehlike-orta
+            {% else %}tehlike-yuksek{% endif %}">
+            <h3>{{ sonuc.mesaj }}</h3>
+            <p>
+                {% if sonuc.tehlike == 'yok' %}✅ Tarlada böcek sorunu görünmüyor.
+                {% elif sonuc.tehlike == 'orta' %}⚠️ Az sayıda böcek var, takip edin.
+                {% else %}🚨 Yüksek böcek yoğunluğu! İlaçlama önerilir.{% endif %}
+            </p>
+        </div>
+
+        {% if tahmin_yolu %}
+        <div class="tahmin-goruntu">
+            <p style="margin-bottom:10px; color:#666; font-size:14px;">
+                Tespit edilen böcekler kutucukla işaretlendi:
+            </p>
+            <img src="{{ url_for('static', filename=tahmin_yolu) }}" alt="Tahmin">
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+function onizle(input) {
+    const div = document.getElementById('onizleme');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            div.innerHTML = `<img src="${e.target.result}" alt="Önizleme">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+document.getElementById('form').onsubmit = function() {
+    document.getElementById('btn').disabled = true;
+    document.getElementById('btn').textContent = '⏳ Analiz ediliyor...';
+    document.getElementById('yukluyor').style.display = 'block';
+};
+</script>
+</body>
+</html>
